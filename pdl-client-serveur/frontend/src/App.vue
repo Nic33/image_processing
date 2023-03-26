@@ -214,7 +214,7 @@
 
       <h2>Remerciment</h2>
       <a target="_blank" href="https://www.u-bordeaux.fr/">
-          <img class="logo" src="./assets/Universite Bordeaux RVB-08.png"> 
+          <img class="logo" src="./assets/Universite_Bordeaux_RVB-08.png"> 
       </a>
 
       <br>

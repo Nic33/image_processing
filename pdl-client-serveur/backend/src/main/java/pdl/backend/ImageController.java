@@ -82,8 +82,8 @@ public class ImageController {
   @RequestMapping(value = "/images/{id}", method = RequestMethod.GET, produces = MediaType.IMAGE_JPEG_VALUE)
   @SuppressWarnings("unchecked")
   public ResponseEntity<?> getImage(@PathVariable("id") long id,
-      @RequestParam(name = "edit", required = false) long edit,
-      @RequestParam(name = "algorithm", required = false) String algorithm,
+/*       @RequestParam(name = "edit", required = false) long edit,
+ */      @RequestParam(name = "algorithm", required = false) String algorithm,
       @RequestParam(name = "p1", required = false) Long p1,
       @RequestParam(name = "p2", required = false) Long p2,
       @RequestParam(name = "tableau", required = false) String[] tableauParam) {
