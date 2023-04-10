@@ -43,7 +43,7 @@ And :
 
 # About the project
 
-Languages used :
+<ins>Languages used :</ins>
 
 <div>
 
@@ -57,7 +57,7 @@ Languages used :
 
 </div>
 
-Maj :
+<ins>Maj :</ins>
 
 Version 1.0 : 
 
