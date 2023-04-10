@@ -49,12 +49,12 @@ const routes: Array<RouteRecordRaw> = [
     props: ({ params }) => ({ id: Number(params.id) || 0 })
   },
 
-/*   {
+   {
     path: "/bottom",
     name: "bottom",
     component: () => import("./components/V2/Bottom.vue"),
     props: true
-  }, */
+  }, 
   {
     path: "/contour",
     name: "contour",
@@ -71,6 +71,12 @@ const routes: Array<RouteRecordRaw> = [
     path: "/paint",
     name: "paint",
     component: () => import("./components/V2/Paint.vue"),
+    props: true
+    },
+  {
+    path: "/color",
+    name: "color",
+    component: () => import("./components/V2/Color.vue"),
     props: true
   }
 ];

@@ -67,8 +67,14 @@
   }
 
   @media (max-width:800px) {
+
     #gal{
       width: 80%;
     }
+
+    #gal:hover{
+      width: 90%;
+    }
+
   }
 </style>

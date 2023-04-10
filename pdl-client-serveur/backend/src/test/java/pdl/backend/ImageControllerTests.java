@@ -20,7 +20,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -33,7 +32,7 @@ public class ImageControllerTests {
 	@BeforeAll
 	public static void reset() {
 		// reset Image class static counter
-		ReflectionTestUtils.setField(Image.class, "count", Long.valueOf(0));
+		ReflectionTestUtils.setField(My_Image.class, "count", Long.valueOf(0));
 	}
 
 	@Test
@@ -111,15 +110,4 @@ public class ImageControllerTests {
 		this.mockMvc.perform(MockMvcRequestBuilders.multipart("/images").file(multipartFilePdf)).andDo(print())
 				.andExpect(status().isUnsupportedMediaType());
 	}
-
-	/*
-	 * @Test
-	 * 
-	 * @Order(10)
-	 * public void getImagefromEmptyFolder() throws Exception {
-	 * mockMvc.perform(MockMvcRequestBuilders.get("/images/empty")).andExpect(
-	 * MockMvcResultMatchers.status().isNotFound());
-	 * }
-	 */
-
 }

@@ -19,14 +19,16 @@
   const x = ref(0);
   const y = ref(0);
 
-  const widthId = ref(600);
-  const heightId = ref(300);  
+  const widthId = ref(100);
+  const heightId = ref(100);  
 
   //image setting
   const typeId = ref("png");
   const imageId = ref("");
 
   const VueCanvasDrawing = ref()
+
+  const Quality = ref(0.75);
 
   //---------------------------------------------------//
 
@@ -44,6 +46,8 @@
 
   onMounted(() => { // super utile
     Refresh(false)
+    displayWindowSize()
+
   })
 
   async function Refresh(value : boolean){
@@ -75,7 +79,7 @@
       const blob = await base64.blob();
 
       const formData = new FormData();
-      formData.append("file", blob, textId.value + ".png"); 
+      formData.append("file", blob, textId.value + '.' +typeId.value); 
 
       api.createImage(formData)
         .then(() => {
@@ -98,27 +102,111 @@
 
   //---------------------------------------------------//
 
-  function downloadFile() {
+  async function convertBlobPngToJpg(blob : Blob) {
+    const img = new Image();
+    img.src = URL.createObjectURL(blob);
+
+    await new Promise((resolve) => {
+      img.onload = resolve;
+    });
+
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+
+    const ctx = canvas.getContext('2d');
+    ctx?.drawImage(img, 0, 0);
+
+    const jpegBlob = await new Promise((resolve) => {
+      canvas.toBlob((blob) => {
+        resolve(blob);
+      }, 'image/jpeg', 0.75);
+    });
+    
+    return jpegBlob;
+  }
+
+  async function downloadFile() {
 
     if (textId.value == ""){
       createToast({ title: 'info' , description: 'Vous devez mettre un titre'} , {toastBackgroundColor : 'rgb(0, 128, 0)', type : 'info', timeout : 5000, position : 'top-center', showIcon : true});
+    }else{      
+      
+    const response = await fetch(imageId.value);
+
+    var blob = null;
+
+    if (typeId.value == 'jpg'){
+      blob = await convertBlobPngToJpg( await response.blob());
+
     }else{
-      var a = document.createElement("a"); //Create <a>
-      a.href = imageId.value; //Image Base64 Goes here
-      a.download = textId.value + ".png"; //File name Here
-      a.click(); //Downloaded file
+      blob = await response.blob();
     }
-}
+    
+    const link = document.createElement("a");
+    if (blob instanceof Blob) {
+      link.href = URL.createObjectURL(blob);
+    }
+    link.download = textId.value;
+    link.click();
+
+    URL.revokeObjectURL(link.href);
+    
+    }
+  }
+
+  function displayWindowSize(){
+    var ipt1 = <HTMLInputElement> document.getElementById("input_x");
+    var ipt2 = <HTMLInputElement> document.getElementById("input_y");
+
+    if (ipt1 != null && ipt2 != null){
+      ipt1.max = (window.innerWidth - 50).toString();
+      ipt2.max = (window.innerWidth - 50).toString();
+
+      widthId.value = 100;
+      New_page();
+
+    }else{
+      console.log("error : function displayWindowSize");
+      createToast({ title: 'error' , description: 'Une erreur est survenue'} , {toastBackgroundColor : 'rgb(255,0,0)', type : 'danger', timeout : 5000, position : 'top-center', showIcon : true});
+
+    }
+
+  }
+
+  window.addEventListener("resize", displayWindowSize);
+
+  //---------------------------------------------------//
+
+  function fun_quatity(){
+    var ipt = document.getElementById("format");
+
+    if (ipt != null){
+      if (typeId.value == 'png'){
+        ipt.style.display = 'none';
+      }else{
+        ipt.style.display = 'inline'
+        createToast({ title: 'info' , description: "Vous pouvez modifier la qualité de l'image"} , {toastBackgroundColor : 'rgb(0, 128, 0)', type : 'info', timeout : 5000, position : 'top-center', showIcon : true});
+
+      }
+    }else{
+      console.log("error : function fun_quatity");
+      createToast({ title: 'error' , description: 'Une erreur est survenue'} , {toastBackgroundColor : 'rgb(255,0,0)', type : 'danger', timeout : 5000, position : 'top-center', showIcon : true});
+
+    }
+  }
 
 </script>
 
 <template>
+
 <div>
   <h3>Paint</h3>
 
-  <input type="range" min="10" max="1000" @change="New_page()" v-model="widthId">
+  <input id = "input_x" type="range" min="10" @change="New_page()" v-model="widthId">
 
-  <input type="range" min="10" max="500" @change="New_page()" v-model="heightId">
+  <input id = "input_y" type="range" min="10" @change="New_page()" v-model="heightId">
+
   <br>
   {{ widthId }} x {{ heightId }}
 
@@ -203,6 +291,11 @@
     <hr>
     <input type="text" style="width:100px" v-model="textId">
 
+    <select v-model="typeId" name="format" @change="fun_quatity()">
+      <option :value="'png'">png</option>
+      <option :value="'jpg'">jpg</option>
+    </select>
+
     <button type="button" @click.prevent="Save()">
       submit
     </button>
@@ -210,6 +303,11 @@
     <button type="button" @click.prevent="downloadFile()">
       download file
     </button>
+
+    <div id="format">
+      <hr>
+      <input type="range" min="0" max="1"  step="0.05" v-model="Quality">
+    </div>
 
 </div> 
 </template>
@@ -227,11 +325,13 @@
   }
 
   hr{
-    margin-left:40%;
-    margin-right:40%;
+    width: 300px;
 
   }
 
+  #format{
+    display: none;
+  }
 
 </style>
 

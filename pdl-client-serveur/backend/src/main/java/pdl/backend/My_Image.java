@@ -1,6 +1,6 @@
 package pdl.backend;
 
-public class Image {
+public class My_Image {
   private static Long count = Long.valueOf(0);
   private Long id;
   private String name;
@@ -9,7 +9,7 @@ public class Image {
   private String size;
   private boolean isColor;
 
-  public Image(final String name, final byte[] data, String type, String size, boolean isColor) {
+  public My_Image(final String name, final byte[] data, String type, String size, boolean isColor) {
     id = count++;
     this.name = name;
     this.data = data;
@@ -18,7 +18,7 @@ public class Image {
     this.isColor = isColor;
   }
 
-  public Image(final String name, final byte[] data, final long myid, String type, String size, boolean isColor) {
+  public My_Image(final String name, final byte[] data, final long myid, String type, String size, boolean isColor) {
     id = myid;
     this.name = name;
     this.data = data;

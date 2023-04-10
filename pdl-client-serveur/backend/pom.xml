@@ -40,6 +40,11 @@
 			<version>0.41</version>
 		</dependency>
 	
+		<dependency>
+			<groupId>org.boofcv</groupId>
+			<artifactId>boofcv-ip</artifactId>
+			<version>0.40</version>
+		</dependency>	
 		
 	</dependencies>
 

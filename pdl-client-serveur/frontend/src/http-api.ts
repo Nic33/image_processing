@@ -33,9 +33,6 @@ export const api = {
     };
     return requests.get(`images/${id}`, {params, responseType: "blob"});
   },
-  
-  ChangeImages:(id: number, edit: number ,algo: string, p1: number, p2: number): Promise<Blob> => 
-    requests.get(`images/${id}`, {params : {id2 : edit, algorithm : algo, p1 : p1, p2: p2} , responseType: "blob"}),
 
 
 };

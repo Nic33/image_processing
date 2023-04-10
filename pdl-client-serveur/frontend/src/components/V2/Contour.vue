@@ -7,10 +7,6 @@
 
   //-----------------------------------------------//
 
-  var contour = true; // contour ou bottom
-
-  //-----------------------------------------------//
-
   const imageId = ref(-1);
   const imageList = ref<ImageType[]>([]);
   getImageList();
@@ -73,25 +69,33 @@
       }
   }
 
+  var ok_to_draw = true;
+
   function draw(evt : any) {
-    var canvas = <HTMLCanvasElement> document.getElementById("myCanvas");
+    if (ok_to_draw == true){
+        var canvas = <HTMLCanvasElement> document.getElementById("myCanvas");
 
-    var rect = canvas.getBoundingClientRect();
-    const x = Math.floor(evt.clientX - rect.left);
-    const y = Math.floor(evt.clientY - rect.top);
+        var rect = canvas.getBoundingClientRect();
+        const x = Math.floor(evt.clientX - rect.left);
+        const y = Math.floor(evt.clientY - rect.top);
 
-    if (img_is_put == true){
+        if (img_is_put == true){
 
-      last_tab.push(x);
-      last_tab.push(y);
+            last_tab.push(x);
+            last_tab.push(y);
 
-      drawPixel(x, y);
+            drawPixel(x, y);
+
+        }else{
+
+        createToast({ title: 'info', description: "Merci de selectionner une image d'abord"} , {toastBackgroundColor : 'rgb(0,128,0)', type : 'info', timeout : 5000, position : 'top-center', showIcon : true});
+
+        }
 
     }else{
-
-      createToast({ title: 'info', description: "Merci de selectionner une image d'abord"} , {toastBackgroundColor : 'rgb(0,128,0)', type : 'info', timeout : 5000, position : 'top-center', showIcon : true});
-
+        console.log('not draw');
     }
+
   }
 
   // Dessiner une ligne entre deux points
@@ -101,8 +105,6 @@
 
     var canvas = <HTMLCanvasElement> document.getElementById("myCanvas");
     
-    var button_push = document.getElementById("cut");
-
     if (canvas != null){
       var ctx = canvas.getContext("2d");
 
@@ -116,19 +118,12 @@
 
         newArray = newArray.concat(bresenhamLine(x1,y1,x2,y2));
         
-        //console.log(newArray);
-
         if (tour_complet() == true){
 
           createToast({ title: 'info', description: "Un croisement à été détecté"} , {toastBackgroundColor : 'rgb(0,128,0)', type : 'info', timeout : 5000, position : 'top-center', showIcon : true});
+          ok_to_draw = false;
 
-
-          if(button_push != null){
-              button_push.style.display = "inline";
-          }else{
-            console.log("error : function drawLine()")
-            createToast({ title: 'error', description: 'Une erreur est survenue'} , {toastBackgroundColor : 'rgb(255,0,0)', type : 'danger', timeout : 5000, position : 'top-center', showIcon : true});
-          }
+          cut();
 
         }else{
           //rien à faire
@@ -145,6 +140,37 @@
     }
   }
 
+
+  function reset_all(){
+
+    tab.splice(0, tab.length); // Supprime toutes les valeurs du tableau
+    newArray.splice(0, newArray.length);
+    Point_de_croisement.splice(0, Point_de_croisement.length);      
+    last_tab.splice(0, last_tab.length);
+
+    index = 0;
+
+    ok_to_draw = true;
+
+    var canvas = <HTMLCanvasElement> document.getElementById("myCanvas");
+
+    if (canvas != null){
+        var ctx = canvas.getContext("2d");
+
+        if (ctx != null){
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(base_image, 0, 0);
+
+        }else{
+            console.log("error : function reset_all()")
+            createToast({ title: 'error', description: 'Une erreur est survenue'} , {toastBackgroundColor : 'rgb(255,0,0)', type : 'danger', timeout : 5000, position : 'top-center', showIcon : true});
+        }
+    }else{
+        console.log("error : function reset_all()")
+        createToast({ title: 'error', description: 'Une erreur est survenue'} , {toastBackgroundColor : 'rgb(255,0,0)', type : 'danger', timeout : 5000, position : 'top-center', showIcon : true});
+    }
+
+    }
   //Obligé de l'utliser pour detecter le point de croisement
   function bresenhamLine(x0: number, y0: number, x1: number, y1: number): [number, number][] {
 
@@ -243,6 +269,8 @@ function tour_complet(): boolean {
 
   function setBackgroung(value : boolean){
 
+    reset_all();
+
     var btn_wait = document.getElementById("wait");
     var canvas = <HTMLCanvasElement> document.getElementById("myCanvas");
     var select = document.getElementById("select");
@@ -256,6 +284,8 @@ function tour_complet(): boolean {
 
       if (canvas != null && btn_wait != null && select != null){
         
+        canvas.style.display = 'inline';
+
         createToast({ title: 'info', description: 'Please wait'} , {toastBackgroundColor : 'rgb(0,128,0)', type : 'info', timeout : 2000, position : 'top-center', showIcon : true});
 
         base_image.src = 'images/'+ imageId.value.toString();
@@ -321,62 +351,11 @@ function tour_complet(): boolean {
 
     console.log("last_tab = "+ last_tab);
 
-    if (contour == true){
-      await api.ChangeImage(imageId.value, "Cut" , -1 , -1, last_tab); 
-    }else{
-      await api.ChangeImage(imageId.value, "Bottom" , -1 , -1, last_tab); 
-    }
+    await api.ChangeImage(imageId.value, "Cut" , -1 , -1, last_tab); 
+
     //location.reload();
     createToast({ title: 'info', description: "L'image a été modifié, vous pouvez la visualiser dans la galerie"} , {toastBackgroundColor : 'rgb(0,128,0)', type : 'info', timeout : 5000, position : 'top-center', showIcon : true});
 
-  }
-
-
-  function switch_version(){
-
-    var note = document.getElementById("note");
-    var sw = document.getElementById("switch");
-
-    var h3 = document.querySelector("h3");
-
-    var img = document.querySelector("img");
-
-
-    if (note != null && sw != null && h3 != null && img !=  null){
-
-      if (contour){
-
-        contour = false; // bottom
-
-        note.innerText = "Le logiciel va supprimer un bouton de votre tête. "+
-        "Merci de selectionner une image avec une tête visible comme ci-dessous :"
-        
-        sw.innerText = "switch on contour";
-        h3.innerText = "Bottom";
-
-        img.style.display = 'inline';
-
-        console.log("Bottom");
-
-      }else{
-        contour = true; // cut
-
-        note.innerText = "Le logiciel va supprimer la partie de l'image que vous aurez selectionné."
-        
-        sw.innerText = "switch on bottom elimination";
-        h3.innerText = "Contour";
-
-        img.style.display = 'none';
-
-        console.log("contour");
-
-      }
-
-    }else{
-      console.log("error: function switch_version()");
-      createToast({ title: 'error', description: 'Une erreur est survenue'} , {toastBackgroundColor : 'rgb(255,0,0)', type : 'danger', timeout : 5000, position : 'top-center', showIcon : true});
-    }
-    
   }
 
 </script>
@@ -387,13 +366,7 @@ function tour_complet(): boolean {
   <h3>Contour</h3>
   <div id ="panel">
         
-    <button id = "switch"  @click.prevent="switch_version()">
-      switch on buttom elimination
-    </button>
-
-    <p id ="note">L'objectif de cette partie est de supprimer la partie de l'image que vous aurez selectionné.</p>
-
-    <img src="../../assets/logo_bottom.png">
+    <p id ="note">L'objectif de cette partie est de supprimer la partie de l'image que vous aurez selectionné au préalable.</p>
 
   </div>
 
@@ -401,7 +374,6 @@ function tour_complet(): boolean {
 
   <canvas id="myCanvas" :width="w" :height="h" @click.prevent="draw($event)"></canvas>
   
-  <br>
   <br>
 
   <div id = "controle">
@@ -417,8 +389,12 @@ function tour_complet(): boolean {
     </div>
 
 
-    <input type="color" v-model="colorId">       
-    
+    <input type="color" v-model="colorId">  
+
+    <button id = "reset" @click="reset_all()">
+        reset
+    </button>
+
     <div id = "wait">
 
       <br>
@@ -429,7 +405,7 @@ function tour_complet(): boolean {
 
     </div>
 
-    <div id = "cut">
+<!--     <div id = "cut">
 
       <br>
       <br>
@@ -437,19 +413,7 @@ function tour_complet(): boolean {
         couper l'image
       </button>
     </div>
-
-  </div>
-
-  <div id = "problem">
-
-    <span class="material-symbols-outlined">
-      report 
-    </span>
-
-    <br>
-
-    Si il y a un point de croisement mais que le logiciel ne le detecte pas, alors rechargez la page.
-
+ -->
   </div>
 
 </div> 
@@ -459,6 +423,7 @@ function tour_complet(): boolean {
 
   canvas{
     border: solid 1px rgb(0, 0, 0);
+    display: none;
   }
 
   #wait{
@@ -468,12 +433,7 @@ function tour_complet(): boolean {
   #cut{
     display: none;
   }
-  img{
-    width: 150px;
-    background-color: rgb(255, 255, 255);
-    display: none;
-    border-radius: 10px;
-  }
+
   #controle{
     width: 300px;
     margin-left: auto;
@@ -487,15 +447,6 @@ function tour_complet(): boolean {
     margin-bottom: 20px;
   }
 
-  #problem{
-    margin-left: auto;
-    margin-right: auto;
-    background-color: rgb(137, 0, 0);
-    color: white;
-    border-radius: 10px;
-    padding: 10px;
-    padding-bottom: 20px;
-  }
 
   #panel{
     max-width: 600px;
@@ -508,29 +459,9 @@ function tour_complet(): boolean {
     padding-bottom: 20px;
   }
 
-  #switch{
-    transition: 0.2s;
-    border-radius: 10px;
-
-    border: solid 4px green;
-
-    background-color: rgb(255, 255, 255);
-    color: green;
-
-    padding: 10px;
-
+  #reset{
+    margin:10px;
   }
 
-  #switch:hover{
-
-    transition: 0.2s;
-    border-radius: 20px;
-
-    border: solid 4px green;
-
-    background-color: rgb(0, 171, 88);
-    color: rgb(255, 255, 255);
-
-  }
 </style>
 

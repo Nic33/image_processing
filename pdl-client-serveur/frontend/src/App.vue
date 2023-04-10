@@ -55,29 +55,35 @@
 
   function displayWindowSize(){
 
-    if (isMobileDevice()) {
-      console.log("Vous consultez cette page sur un smartphone");
-
-      createToast({ title: 'error', description: "Attention, vous utilisez le site sur votre smartphone, vous n'aurez pas accès à toutes les fonctionnalités que peut proposer le site web."} , {toastBackgroundColor : 'rgb(255, 0, 0)', type : 'danger', timeout : 10000, position : 'top-center', showIcon : true});
-
-    } else {
-      console.log("Vous consultez cette page sur un ordinateur");
-
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      console.log("Window size: " + width + " x " + height);
-
-      if(width < 960 && cpt == false){
-        createToast({ title: 'error', description: "Attention, vous utilisez le site sur une petite fenêtre, il se peut que les images se redimensionnent mal."} , {toastBackgroundColor : 'rgb(255, 0, 0)', type : 'danger', timeout : 10000, position : 'top-center', showIcon : true});
+    if (cpt == false){
+      
+      if (isMobileDevice()) {
 
         cpt = true;
 
-      }
+        createToast({ title: 'error', description: "Attention, vous utilisez le site sur votre smartphone, vous n'aurez pas accès à toutes les fonctionnalités que peut proposer le site web."} , {toastBackgroundColor : 'rgb(255, 0, 0)', type : 'danger', timeout : 10000, position : 'top-center', showIcon : true});
+        setTimeout(function() {
+          cpt = false;
+        }, 10000);
 
-      setTimeout(function() {
-        cpt = false;
-      }, 10000);
+      } else {
+
+        const width = window.innerWidth;
+
+        if(width < 960){
+
+          cpt = true;
+
+          createToast({ title: 'error', description: "Attention, vous utilisez le site sur une petite fenêtre. Pour des raisons d'ergonomies, nous désactivons les fonctionnalités 'Editor', 'Cut' et 'Bottom'."} , {toastBackgroundColor : 'rgb(255, 0, 0)', type : 'danger', timeout : 10000, position : 'top-center', showIcon : true});
+          setTimeout(function() {
+            cpt = false;
+          }, 10000);
+
+        }
+
+      }
     }
+
   }
 
   window.addEventListener("resize", displayWindowSize);
@@ -138,10 +144,6 @@
           </router-link>
         </a>
 
-        <a class="vl2">
-          <div></div> 
-        </a>
-
         <a @click="closeMobileMenu()">
           <router-link to="/modify">
           <span class="material-symbols-outlined">
@@ -150,7 +152,11 @@
         </router-link>
         </a>
 
-        <a @click="closeMobileMenu()">
+        <a class="vl2">
+          <div></div> 
+        </a>
+
+        <a id = "only_PC" @click="closeMobileMenu()">
           <router-link to="/editor">
             <span class="material-symbols-outlined">
               photo_size_select_small
@@ -166,21 +172,30 @@
           </router-link>
         </a>
 
-        <a @click="closeMobileMenu()">
+        <a id = "only_PC" @click="closeMobileMenu()">
           <router-link to="/contour">
           <span class="material-symbols-outlined">
             cut
           </span>
         </router-link>
         </a>
-        <!-- <a>
+
+        <a id = "only_PC" @click="closeMobileMenu()">
           <router-link to="/bottom">
             <span class="material-symbols-outlined">
               align_flex_end
             </span>
           </router-link>
         </a>
-         -->
+
+        <a id = "only_PC" @click="closeMobileMenu()">
+          <router-link to="/color">
+            <span class="material-symbols-outlined">
+              format_color_reset
+            </span>
+          </router-link>
+        </a>
+
       </ul>
 
     </div>
@@ -199,7 +214,7 @@
         <a target="_blank" href="https://www.linkedin.com/in/nicolas-dubuisson-b4b856226/">Nicolas Dubuisson</a>.
       </p>
       <p>Ce projet s'inscrit dans le cadre de notre matière Projet Développement Logiciel de la Licence Informatique de l'Université de Bordeaux.</p>
-      <p> Nous n'avons aucun but commercial, nous voulons juste montrer nos connaissances en therme de développement informatique.</p>
+      <p> Nous n'avons aucun objectif commercial, nous voulons juste montrer nos connaissances en therme de développement informatique.</p>
       
       <br>
 
@@ -207,7 +222,7 @@
       <a target="_blank" href="https://spring.io/">Java Spring</a>
       <br>
       <br>
-      <a target="_blank" href="https://vuejs.org/guide/typescript/overview.html">Vue.js (with TypeScript)</a>
+      <a target="_blank" href="https://vuejs.org/guide/typescript/overview.html">Vue.js (TypeScript)</a>
 
       <br>
       <br>
@@ -344,9 +359,14 @@
 
   }
 
+  #only_PC{
+    display:none;
+  }
+
 }
 
 .material-symbols-outlined {
+
   font-variation-settings:
   'FILL' 0,
   'wght' 700,
@@ -365,7 +385,7 @@ footer{
 }
 
 .logo{
-  width: 300px;
+  width: 250px;
   border-radius: 10px;
 }
 

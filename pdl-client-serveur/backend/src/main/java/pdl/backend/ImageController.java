@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 
 import boofcv.io.image.ConvertBufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+
 import javax.imageio.ImageIO;
 import boofcv.struct.image.GrayU8;
 
@@ -18,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
@@ -35,6 +38,7 @@ import java.awt.image.BufferedImage;
 import java.nio.file.Files;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.lang.reflect.InvocationTargetException;
 import boofcv.struct.image.Planar;
 
@@ -46,7 +50,6 @@ public class ImageController {
 
   private final ImageDao imageDao;
 
-  @Autowired
   public ImageController(ImageDao imageDao) {
     this.imageDao = imageDao;
   }
@@ -54,9 +57,9 @@ public class ImageController {
   @RequestMapping(value = "/images", method = RequestMethod.GET, produces = "application/json")
   @ResponseBody
   public ArrayNode getImageList() {
-    List<Image> images = imageDao.retrieveAll();
+    List<My_Image> images = imageDao.retrieveAll();
     ArrayNode nodes = mapper.createArrayNode();
-    for (Image image : images) {
+    for (My_Image image : images) {
       ObjectNode objectNode = mapper.createObjectNode();
       objectNode.put("id", image.getId());
       objectNode.put("name", image.getName());
@@ -68,34 +71,25 @@ public class ImageController {
     return nodes;
   }
 
-  public class Tuple<T1, T2> {
-    public final T1 item1;
-    public final T2 item2;
-    
-    public Tuple(T1 item1, T2 item2) {
-        this.item1 = item1;
-        this.item2 = item2;
-    }
-}
-
-
   @RequestMapping(value = "/images/{id}", method = RequestMethod.GET, produces = MediaType.IMAGE_JPEG_VALUE)
-  @SuppressWarnings("unchecked")
   public ResponseEntity<?> getImage(@PathVariable("id") long id,
-/*       @RequestParam(name = "edit", required = false) long edit,
- */      @RequestParam(name = "algorithm", required = false) String algorithm,
+      /*
+       * @RequestParam(name = "edit", required = false) long edit,
+       */ @RequestParam(name = "algorithm", required = false) String algorithm,
       @RequestParam(name = "p1", required = false) Long p1,
       @RequestParam(name = "p2", required = false) Long p2,
       @RequestParam(name = "tableau", required = false) String[] tableauParam) {
-  
-      List<Integer> tableau = null;
-      if (tableauParam != null) {
-        tableau = Arrays.stream(tableauParam)
-                        .map(Integer::parseInt)
-                        .collect(Collectors.toList());
-      }
 
-    Optional<Image> image = imageDao.retrieve(id);
+    List<Integer> tableau = null;
+    if (tableauParam != null) {
+      tableau = Arrays.stream(tableauParam)
+          .map(Integer::parseInt)
+          .collect(Collectors.toList());
+    }
+
+    // System.out.println("algorithm = " + algorithm + " value = " + p1 + " value =
+    // " + p2 + " tableau = " + tableau);
+    Optional<My_Image> image = imageDao.retrieve(id);
 
     if (!image.isPresent()) {
       return new ResponseEntity<>("Image id=" + id + " not found.", HttpStatus.NOT_FOUND);
@@ -103,54 +97,43 @@ public class ImageController {
 
     try {
       if (algorithm != null) {
-        System.out.println("Image Traitement request");
+        // System.out.println("Image Traitement request");
 
         LevelProcessing color = new LevelProcessing();
-        Method getMethod = null;
+        Method getMethod = selectMethodeFromParam(p1, p2, tableau, algorithm, color);
 
-        if (p1 == -1 && p2 == -1) {
-          System.out.println("0 parametre");
-          getMethod = color.getClass().getMethod(algorithm, Planar.class);
-
-        } else if (p1 != -1 && p2 == -1) {
-          System.out.println("1 parametre");
-          getMethod = color.getClass().getMethod(algorithm, Planar.class, Long.class);
-
-        } else if (p1 != -1 && p2 == -1) {
-          System.out.println("1 parametre");
-          getMethod = color.getClass().getMethod(algorithm, Planar.class, Long.class);
-
-        } else {
-          System.out.println("2 parametres");
-          getMethod = color.getClass().getMethod(algorithm, Planar.class, Long.class, Long.class);
-
-        }
-
-        Planar<GrayU8> output;
         Planar<GrayU8> input = getPlanarFromImage(image);
         InputStream inputStream;
 
         try {
 
-          if (p1 == -1 && p2 == -1) {
-            System.out.println("0 parametre");
-            output = (Planar<GrayU8>) getMethod.invoke(getMethod, input);
+          Planar<GrayU8> output = callMethodeFromParam(p1, p2, tableau, algorithm, getMethod, input);
 
-          } else if (p1 != -1 && p2 == -1) {
-            System.out.println("1 parametre");
-            output = (Planar<GrayU8>) getMethod.invoke(getMethod, input, p1);
+          if (p1 == -1 && p2 == -1 && tableau != null && !(tableau.isEmpty())) {
+            BufferedImage outputBytes = ConvertBufferedImage.convertTo(output, null, true);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try {
+              ImageIO.write(outputBytes, "png", baos);
+            } catch (IOException e) {
+              throw e;
+            }
+            byte[] imageBytes = baos.toByteArray();
+
+            My_Image img = NamePngImg(image.get(), algorithm, outputBytes, imageBytes);
+
+            inputStream = new ByteArrayInputStream(imageBytes);
+            imageDao.create(img);
+
+            return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_PNG)
+                .body(new InputStreamResource(inputStream)); // Return the modified image
 
           } else {
-            System.out.println("2 parametres");
-            output = (Planar<GrayU8>) getMethod.invoke(getMethod, input, p1, p2);
-
+            inputStream = updateImage(image, output);
+            return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_JPEG)
+                .body(new InputStreamResource(inputStream)); // Return the modified image
           }
-
-          inputStream = updateImage(image, output);
-
-          return ResponseEntity.ok()
-              .contentType(MediaType.IMAGE_JPEG)
-              .body(new InputStreamResource(inputStream)); // Return the modified image
 
         } catch (IllegalAccessException e) {
           return new ResponseEntity<>("Not resolving traitement function name: " + e.getMessage(),
@@ -161,9 +144,12 @@ public class ImageController {
         } catch (InvocationTargetException e) {
           return new ResponseEntity<>("Exception from called methode: " + e.getMessage(),
               HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+          return new ResponseEntity<>("Exception from called methode: " + e.getMessage(),
+              HttpStatus.INTERNAL_SERVER_ERROR);
         }
       } else {
-        System.out.println("Simple Image Request");
+        // System.out.println("Simple Image Request");
 
         InputStream inputStream = new ByteArrayInputStream(image.get().getData());
         return ResponseEntity.ok()
@@ -178,7 +164,7 @@ public class ImageController {
   @RequestMapping(value = "/images/{id}", method = RequestMethod.DELETE)
   public ResponseEntity<?> deleteImage(@PathVariable("id") long id) {
 
-    Optional<Image> image = imageDao.retrieve(id);
+    Optional<My_Image> image = imageDao.retrieve(id);
 
     if (image.isPresent()) {
       imageDao.delete(image.get());
@@ -195,9 +181,15 @@ public class ImageController {
     }
 
     try {
-      Path filePath = Files.createTempFile("temp", file.getOriginalFilename());
+      String originalFileName = file.getOriginalFilename(); // récupérer le nom de fichier original
+      String extension = FilenameUtils.getExtension(originalFileName); // récupérer l'extension de fichier
+      Path filePath = Files.createTempFile("temp", "." + extension); // créer le fichier temporaire avec l'extension
+                                                                     // correcte
       Files.write(filePath, file.getBytes());
-      Image img = FilesMethodes.createImage(filePath.toFile(), file.getBytes());
+      File newFile = new File(filePath.getParent().toString(), originalFileName); // créer un nouveau fichier avec le
+                                                                                  // nom d'origine
+      Files.move(filePath, newFile.toPath(), StandardCopyOption.REPLACE_EXISTING); // renommer le fichier temporaire
+      My_Image img = FilesMethodes.createImage(newFile, file.getBytes());
       imageDao.create(img);
     } catch (IOException e) {
       return new ResponseEntity<>("Failure to read file", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
@@ -207,7 +199,82 @@ public class ImageController {
 
   // fonctions auxilières
 
-  public Planar<GrayU8> getPlanarFromImage(Optional<Image> image) throws IOException {
+  private Method selectMethodeFromParam(Long p1, Long p2, List<Integer> tableau, String algorithm,
+      LevelProcessing color) throws Exception {
+
+    if (algorithm.equals("Edit")){
+      
+      System.out.println("Edit");
+      return color.getClass().getMethod(algorithm, Planar.class, Planar.class, List.class);
+
+    }else {
+    
+      if (p1 == -1 && p2 == -1 && tableau != null && tableau.isEmpty()) {
+        // System.out.println("0 parametre");
+        return color.getClass().getMethod(algorithm, Planar.class);
+
+      } else if (p1 != -1 && p2 == -1 && tableau != null && tableau.isEmpty()) {
+        // System.out.println("1 parametre");
+        return color.getClass().getMethod(algorithm, Planar.class, Long.class);
+
+      } else if (p1 == -1 && p2 == -1 && tableau != null && !(tableau.isEmpty())) {
+        // System.out.println("1 tableau");
+        return color.getClass().getMethod(algorithm, Planar.class, List.class);
+
+      }else if (p1 != -1 && p2 == -1 && tableau != null && !(tableau.isEmpty())) {
+        //System.out.println("1 parametre && 1 tableau");
+        return color.getClass().getMethod(algorithm, Planar.class, Long.class, List.class);
+
+      } else {
+        // System.out.println("2 parametres");
+        return color.getClass().getMethod(algorithm, Planar.class, Long.class, Long.class);
+      }
+    }
+  }
+
+  private Planar<GrayU8> callMethodeFromParam(Long p1, Long p2, List<Integer> tableau, String algorithm,
+  Method getMethod, Planar<GrayU8> input) throws Exception {
+
+  
+    if (algorithm.equals("Edit")){
+      System.out.println("Edit");
+
+      Optional<My_Image> image2 = imageDao.retrieve(p1);
+
+      if (!image2.isPresent()) {
+        return null;
+      }
+
+      Planar<GrayU8> input2 = getPlanarFromImage(image2);
+
+      return (Planar<GrayU8>) getMethod.invoke(getMethod, input, input2, tableau);
+
+    }else {        
+      if (p1 == -1 && p2 == -1 && tableau != null && tableau.isEmpty()) {
+        // System.out.println("0 parametre");
+        return (Planar<GrayU8>) getMethod.invoke(getMethod, input);
+
+      } else if (p1 != -1 && p2 == -1 && tableau != null && tableau.isEmpty()) {
+        // System.out.println("1 parametre");
+        return (Planar<GrayU8>) getMethod.invoke(getMethod, input, p1);
+
+      } else if (p1 == -1 && p2 == -1 && tableau != null && !(tableau.isEmpty())) {
+        // System.out.println("1 tableau");
+        return (Planar<GrayU8>) getMethod.invoke(getMethod, input, tableau);
+
+      }else if (p1 != -1 && p2 == -1 && tableau != null && !(tableau.isEmpty())) {
+        //System.out.println("1 parametre && 1 tableau");
+        return (Planar<GrayU8>) getMethod.invoke(getMethod, input, p1 ,tableau);
+
+      }  else {
+        // System.out.println("2 parametres");
+        return (Planar<GrayU8>) getMethod.invoke(getMethod, input, p1, p2);
+
+      }
+    }
+  }
+
+  private Planar<GrayU8> getPlanarFromImage(Optional<My_Image> image) throws IOException {
     Planar<GrayU8> input;
     if (image.get().isColor()) {
       input = ConvertBufferedImage.convertFromPlanar(
@@ -224,7 +291,7 @@ public class ImageController {
     return input;
   }
 
-  public InputStream updateImage(Optional<Image> image, Planar<GrayU8> output) throws IOException {
+  private InputStream updateImage(Optional<My_Image> image, Planar<GrayU8> output) throws IOException {
     // on sauvegarde l'image
     BufferedImage outputBytes = ConvertBufferedImage.convertTo(output, null, true);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -239,9 +306,29 @@ public class ImageController {
 
     String[] params = { image.get().getName() };
 
-    imageDao.update(new Image(image.get().getName(), imageBytes, image.get().getId(), image.get().getType(),
+    imageDao.update(new My_Image(image.get().getName(), imageBytes, image.get().getId(), image.get().getType(),
         image.get().getSize(), image.get().isColor()), params);
     return inputStream;
+  }
+
+  private My_Image NamePngImg(My_Image image, String algo, BufferedImage outputBytes, byte[] imageBytes) throws Exception {
+    My_Image img;
+    switch (algo) {
+      case "Cut":
+        img = FilesMethodes.createImageFromBuffurerImage(
+            FilesMethodes.getNameWithoutExtension(image.getName()) + "_Cut.png", "png",
+            outputBytes, imageBytes);
+        break;
+      case "Bottom":
+        img = FilesMethodes.createImageFromBuffurerImage(
+            FilesMethodes.getNameWithoutExtension(image.getName()) + "_Bottomed.png", "png",
+            outputBytes, imageBytes);
+        break;
+
+      default:
+        throw new Exception();
+    }
+    return img;
   }
 
 }

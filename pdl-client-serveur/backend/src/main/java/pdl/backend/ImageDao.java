@@ -16,9 +16,9 @@ import org.springframework.stereotype.Repository;
 // mvn --projects backend spring-boot:run
 
 @Repository
-public class ImageDao implements Dao<Image> {
+public class ImageDao implements Dao<My_Image> {
 
-  private final Map<Long, Image> images = new HashMap<>();
+  private final Map<Long, My_Image> images = new HashMap<>();
 
   public ImageDao() throws Exception {
     File imgFile;
@@ -35,29 +35,29 @@ public class ImageDao implements Dao<Image> {
   }
 
   @Override
-  public Optional<Image> retrieve(final long id) {
+  public Optional<My_Image> retrieve(final long id) {
     return Optional.ofNullable(images.get(id));
   }
 
   @Override
-  public List<Image> retrieveAll() {
-    return new ArrayList<Image>(images.values());
+  public List<My_Image> retrieveAll() {
+    return new ArrayList<My_Image>(images.values());
   }
 
   @Override
-  public void create(final Image img) {
+  public void create(final My_Image img) {
     images.put(img.getId(), img);
   }
 
   @Override
-  public void update(final Image img, final String[] params) {
+  public void update(final My_Image img, final String[] params) {
     img.setName(Objects.requireNonNull(params[0], "Name cannot be null"));
 
     images.put(img.getId(), img);
   }
 
   @Override
-  public void delete(final Image img) {
+  public void delete(final My_Image img) {
     images.remove(img.getId());
   }
 }
