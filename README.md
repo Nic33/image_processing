@@ -57,6 +57,38 @@ Languages used :
 
 </div>
 
+Maj :
+
+Version 1.0 : 
+
+Implementation of a spring boot server with vue.js.
+
+We have created a home menu, an image gallery, a section to upload and download an image and a section to modify an image.
+
+In the "modify" section, the user has access to 5 functions to edit his image.
+
+Version 2.0 :
+
+The website is compatible with mobile devices.
+
+We changed the navigation bar and we add a footer.
+
+We add the grey function on the "modify" section.
+
+We created 5 new sections: 
+
+    Editor: The purpose is to overlay two images 
+    Paint : You can draw as you wish 
+    Cut : You can cut a part of the image
+    Bottom : If you want to remove a button on your face
+    Color : To save a chosen color
+
+PS : For each section, you can save the image on the server
+
+Version ... :
+
+...
+
 # How to host this project :
 
 We decide to host the project on [DigitalOcean](https://www.digitalocean.com/).
