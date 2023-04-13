@@ -214,7 +214,7 @@
         <a target="_blank" href="https://www.linkedin.com/in/nicolas-dubuisson-b4b856226/">Nicolas Dubuisson</a>.
       </p>
       <p>Ce projet s'inscrit dans le cadre de notre matière Projet Développement Logiciel de la Licence Informatique de l'Université de Bordeaux.</p>
-      <p> Nous n'avons aucun objectif commercial, nous voulons juste montrer nos connaissances en therme de développement informatique.</p>
+      <p> Nous n'avons aucun objectif commercial, nous voulons juste montrer nos connaissances en termes de développement informatique.</p>
       
       <br>
 
