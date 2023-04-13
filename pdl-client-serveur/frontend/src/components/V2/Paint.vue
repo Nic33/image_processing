@@ -166,10 +166,6 @@
       widthId.value = 100;
       New_page();
 
-    }else{
-      console.log("error : function displayWindowSize");
-      createToast({ title: 'error' , description: 'Une erreur est survenue'} , {toastBackgroundColor : 'rgb(255,0,0)', type : 'danger', timeout : 5000, position : 'top-center', showIcon : true});
-
     }
 
   }
