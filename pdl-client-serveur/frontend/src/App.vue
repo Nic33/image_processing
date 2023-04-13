@@ -219,7 +219,10 @@
       <br>
 
       <h2>Technologies utilisées</h2>
-      <a target="_blank" href="https://spring.io/">Java Spring</a>
+      <a>Java</a>
+      <br>
+      <br>
+      <a target="_blank" href="https://spring.io/">Spring Boot</a>
       <br>
       <br>
       <a target="_blank" href="https://vuejs.org/guide/typescript/overview.html">Vue.js (TypeScript)</a>

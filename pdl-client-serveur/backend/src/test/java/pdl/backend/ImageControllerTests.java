@@ -4,6 +4,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
@@ -110,4 +111,15 @@ public class ImageControllerTests {
 		this.mockMvc.perform(MockMvcRequestBuilders.multipart("/images").file(multipartFilePdf)).andDo(print())
 				.andExpect(status().isUnsupportedMediaType());
 	}
+
+	/*
+	 * @Test
+	 * 
+	 * @Order(10)
+	 * public void getImagefromEmptyFolder() throws Exception {
+	 * mockMvc.perform(MockMvcRequestBuilders.get("/images/empty")).andExpect(
+	 * MockMvcResultMatchers.status().isNotFound());
+	 * }
+	 */
+
 }

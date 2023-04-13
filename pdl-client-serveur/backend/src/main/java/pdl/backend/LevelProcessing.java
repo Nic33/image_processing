@@ -8,13 +8,14 @@ import boofcv.struct.image.GrayS32;
 import boofcv.struct.image.Planar;
 import boofcv.alg.color.ColorHsv;
 import java.lang.Exception;
+import java.security.InvalidParameterException;
+
 import javax.imageio.ImageIO;
 
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-
 
 import boofcv.io.image.ConvertBufferedImage;
 import java.io.IOException;
@@ -663,6 +664,26 @@ public class LevelProcessing {
         return finalarray;
     }
 
+    public static Planar<GrayU8> Rotate(Planar<GrayU8> plan, Long angle) throws InvalidParameterException {
+        if (angle < 0 || angle > 360)
+            throw new InvalidParameterException("Bad value argument");
+        BufferedImage img = ConvertBufferedImage.convertTo(plan, null, true);
+        // Getting Dimensions of image
+        int width = img.getWidth();
+        int height = img.getHeight();
+
+        BufferedImage newImage = new BufferedImage(img.getWidth(), img.getHeight(), img.getType());
+        Graphics2D g2 = newImage.createGraphics();
+
+        g2.rotate(Math.toRadians(angle), width / 2,
+                height / 2);
+        g2.drawImage(img, null, 0, 0);
+        Planar<GrayU8> input;
+        input = ConvertBufferedImage.convertFromPlanar(newImage, plan, true, GrayU8.class);
+
+        return input;
+    }
+
     public static Planar<GrayU8> FiltreColor(Planar<GrayU8> input, Long delta) throws Exception {
         if (delta < 0 || delta > 360)
             throw new Exception("Bad value argument");
@@ -702,10 +723,11 @@ public class LevelProcessing {
         return input;
     }
 
-    public static Planar<GrayU8> FiltreFlou(Planar<GrayU8> input, Long delta) throws Exception { // 0 -> moyenneur
-                                                                                                 // 1 -> gaussien
+    public static Planar<GrayU8> FiltreFlou(Planar<GrayU8> input, Long delta) throws InvalidParameterException { // 0 ->
+                                                                                                                 // moyenneur
+        // 1 -> gaussien
         if (delta != 0 && delta != 1)
-            throw new Exception("Bad value argument");
+            throw new InvalidParameterException("Bad value argument");
         int size = 5;
 
         double[][] kernel = new double[size][size];
@@ -983,7 +1005,7 @@ public class LevelProcessing {
         return input;
     }
 
-    public static Planar<GrayU8> KeepColor(Planar<GrayU8> input, Long delta, List<Integer>mylist){
+    public static Planar<GrayU8> KeepColor(Planar<GrayU8> input, Long delta, List<Integer> mylist) {
 
         // Etape 1 : calculer la valeur trigo de la couleur rgb
 
@@ -994,11 +1016,11 @@ public class LevelProcessing {
 
         ColorHsv.rgbToHsv(r, g, b, hsv_color);
 
-        for (int i = 0; i < 3; i++){
+        for (int i = 0; i < 3; i++) {
             System.out.println(hsv_color[i]);
-        } 
+        }
 
-        float delta_2 = ((float)delta/100);
+        float delta_2 = ((float) delta / 100);
 
         System.out.println("delta " + delta_2);
 
@@ -1008,26 +1030,26 @@ public class LevelProcessing {
         // verification :
         boolean pbl = false;
 
-        if (color_max >= 2*Math.PI){
-            color_max = (float) (color_max - (2*Math.PI));
+        if (color_max >= 2 * Math.PI) {
+            color_max = (float) (color_max - (2 * Math.PI));
             pbl = true;
         }
-        if (color_min < 0){
-            color_min = (float) ((2*Math.PI) + color_min);
+        if (color_min < 0) {
+            color_min = (float) ((2 * Math.PI) + color_min);
             pbl = true;
         }
 
-        System.out.println("["+ color_min + ", " + color_max + "]");
+        System.out.println("[" + color_min + ", " + color_max + "]");
 
         // Etape 2 : on garde la couleur hsv
 
         BufferedImage image = ConvertBufferedImage.convertTo(input, null, true);
-		Planar<GrayF32> rgb = ConvertBufferedImage.convertFromPlanar(image, null, true, GrayF32.class);
+        Planar<GrayF32> rgb = ConvertBufferedImage.convertFromPlanar(image, null, true, GrayF32.class);
         // convertir l'image en espace de couleurs HSV
-		
+
         Planar<GrayF32> hsv = rgb.createSameShape();
-		ColorHsv.rgbToHsv(rgb, hsv);
-        
+        ColorHsv.rgbToHsv(rgb, hsv);
+
         for (int y = 0; y < input.height; ++y) {
             for (int x = 0; x < input.width; ++x) {
 
@@ -1035,28 +1057,28 @@ public class LevelProcessing {
                 float S = hsv.getBand(1).get(x, y); // (0, 1)
                 float V = hsv.getBand(2).get(x, y); // (0, 255)
 
-                if (pbl == false){
-                    if (H <= color_max && H >= color_min ) {
+                if (pbl == false) {
+                    if (H <= color_max && H >= color_min) {
 
                         hsv.getBand(0).set(x, y, H);
                         hsv.getBand(1).set(x, y, S);
                         hsv.getBand(2).set(x, y, V);
-    
+
                     } else {
                         // convertir tous les autres pixels en noir et blanc
                         hsv.getBand(0).set(x, y, 0);
                         hsv.getBand(1).set(x, y, 0);
                         hsv.getBand(2).set(x, y, V);
                     }
-                    
-                }else{ // on passe par 0 sur le cercle trigo
 
-                    if (H <= color_min && H <= color_max ) {
+                } else { // on passe par 0 sur le cercle trigo
+
+                    if (H <= color_min && H <= color_max) {
 
                         hsv.getBand(0).set(x, y, H);
                         hsv.getBand(1).set(x, y, S);
                         hsv.getBand(2).set(x, y, V);
-    
+
                     } else {
                         // convertir tous les autres pixels en noir et blanc
                         hsv.getBand(0).set(x, y, 0);
@@ -1067,8 +1089,7 @@ public class LevelProcessing {
 
             }
         }
-           
-        
+
         ColorHsv.hsvToRgb(hsv, rgb);
 
         image = ConvertBufferedImage.convertTo(rgb, null, true);
@@ -1076,9 +1097,8 @@ public class LevelProcessing {
 
         return rgb2;
     }
-        
 
-    public static Planar<GrayU8> Gray(Planar<GrayU8> input){
+    public static Planar<GrayU8> Gray(Planar<GrayU8> input) {
 
         for (int y = 0; y < input.height; ++y) {
             for (int x = 0; x < input.width; ++x) {
@@ -1096,31 +1116,32 @@ public class LevelProcessing {
         }
         return input;
     }
-    
+
     public static Planar<GrayU8> Edit(Planar<GrayU8> input1, Planar<GrayU8> input2, List<Integer> mylist) {
 
-        System.out.println("size = " + input1.getWidth() + ", " + input1.getHeight() + " / " + input2.getWidth() + ", " + input2.getHeight());
+        System.out.println("size = " + input1.getWidth() + ", " + input1.getHeight() + " / " + input2.getWidth() + ", "
+                + input2.getHeight());
 
         int position_X = (int) mylist.get(0);
         int position_Y = (int) mylist.get(1);
         int front_width = (int) mylist.get(2);
         int front_height = (int) mylist.get(3);
-    
+
         // Convertir les images en objets BufferedImage
         BufferedImage image1 = ConvertBufferedImage.convertTo(input1, null, true);
         BufferedImage image2 = ConvertBufferedImage.convertTo(input2, null, true);
-    
+
         // Redimensionner l'image 2 avec les nouvelles dimensions
         Image scaledImage = image2.getScaledInstance(front_width, front_height, Image.SCALE_SMOOTH);
-    
+
         // Dessiner l'image 2 sur l'image 1 aux positions spécifiées
         Graphics2D g2d = image1.createGraphics();
         g2d.drawImage(scaledImage, position_X, position_Y, null);
         g2d.dispose();
-    
+
         // Convertir l'image BufferedImage en objet Planar<GrayU8>
         Planar<GrayU8> output = ConvertBufferedImage.convertFromPlanar(image1, null, true, GrayU8.class);
-    
+
         return output;
     }
 

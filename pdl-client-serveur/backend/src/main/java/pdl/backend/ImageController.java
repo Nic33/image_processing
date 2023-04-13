@@ -109,31 +109,25 @@ public class ImageController {
 
           Planar<GrayU8> output = callMethodeFromParam(p1, p2, tableau, algorithm, getMethod, input);
 
-          if (p1 == -1 && p2 == -1 && tableau != null && !(tableau.isEmpty())) {
-            BufferedImage outputBytes = ConvertBufferedImage.convertTo(output, null, true);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            try {
-              ImageIO.write(outputBytes, "png", baos);
-            } catch (IOException e) {
-              throw e;
-            }
-            byte[] imageBytes = baos.toByteArray();
-
-            My_Image img = NamePngImg(image.get(), algorithm, outputBytes, imageBytes);
-
-            inputStream = new ByteArrayInputStream(imageBytes);
-            imageDao.create(img);
-
-            return ResponseEntity.ok()
-                .contentType(MediaType.IMAGE_PNG)
-                .body(new InputStreamResource(inputStream)); // Return the modified image
-
-          } else {
-            inputStream = updateImage(image, output);
-            return ResponseEntity.ok()
-                .contentType(MediaType.IMAGE_JPEG)
-                .body(new InputStreamResource(inputStream)); // Return the modified image
+          BufferedImage outputBytes = ConvertBufferedImage.convertTo(output, null, true);
+          ByteArrayOutputStream baos = new ByteArrayOutputStream();
+          try {
+            ImageIO.write(outputBytes, "png", baos);
+          } catch (IOException e) {
+            throw e;
           }
+          byte[] imageBytes = baos.toByteArray();
+
+          My_Image img = NamePngImg(image.get(), algorithm, outputBytes, imageBytes);
+
+          inputStream = new ByteArrayInputStream(imageBytes);
+          imageDao.create(img);
+
+          return ResponseEntity.ok()
+              .contentType(MediaType.IMAGE_PNG)
+              .body(new InputStreamResource(inputStream)); // Return the modified image
+
+  
 
         } catch (IllegalAccessException e) {
           return new ResponseEntity<>("Not resolving traitement function name: " + e.getMessage(),
@@ -314,6 +308,16 @@ public class ImageController {
   private My_Image NamePngImg(My_Image image, String algo, BufferedImage outputBytes, byte[] imageBytes) throws Exception {
     My_Image img;
     switch (algo) {
+      case "KeepColor":
+      img = FilesMethodes.createImageFromBuffurerImage(
+          FilesMethodes.getNameWithoutExtension(image.getName()) + "_Color.png", "png",
+          outputBytes, imageBytes);
+      break;
+      case "Edit":
+        img = FilesMethodes.createImageFromBuffurerImage(
+            FilesMethodes.getNameWithoutExtension(image.getName()) + "_Edit.png", "png",
+            outputBytes, imageBytes);
+        break;
       case "Cut":
         img = FilesMethodes.createImageFromBuffurerImage(
             FilesMethodes.getNameWithoutExtension(image.getName()) + "_Cut.png", "png",
@@ -326,7 +330,10 @@ public class ImageController {
         break;
 
       default:
-        throw new Exception();
+        img = FilesMethodes.createImageFromBuffurerImage(
+          FilesMethodes.getNameWithoutExtension(image.getName()) + "_modify.png", "png",
+          outputBytes, imageBytes);
+    
     }
     return img;
   }
