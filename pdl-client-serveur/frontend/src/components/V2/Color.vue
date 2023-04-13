@@ -36,7 +36,6 @@
 
         tab.splice(0, tab.length);
 
-        var btn_wait = document.getElementById("wait");
         var canvas = <HTMLCanvasElement> document.getElementById("myCanvas");
         var select = document.getElementById("select");
 
@@ -47,7 +46,7 @@
         // on charge l'image 
         if (value == false){
 
-            if (canvas != null && btn_wait != null && select != null){
+            if (canvas != null && select != null){
                 
                 canvas.style.display = 'inline';
 
@@ -59,13 +58,6 @@
 
                 setTimeout(function() {
 
-                if (btn_wait != null){
-
-                    createToast({ title: 'info', description: "Appuyer sur le bouton afficher pour visualiser l'image"} , {toastBackgroundColor : 'rgb(0,128,0)', type : 'info', timeout : 5000, position : 'top-center', showIcon : true});
-
-                    btn_wait.style.display = "inline";
-
-                }
 
                 w.value = base_image.width;
                 h.value = base_image.height;
@@ -73,6 +65,14 @@
                 console.log(w.value)
 
                 }, 2000);
+
+                setTimeout(function() {
+
+                  console.log("affiche")
+
+                  setBackgroung(true);
+
+                }, 2500);
 
             }
             else{
@@ -83,7 +83,7 @@
 
         }else{ // on affiche l'image
 
-            if (canvas != null && btn_wait != null && select != null){
+            if (canvas != null && select != null){
                 
                 if (ctx != null){
                 ctx.drawImage(base_image, 0, 0);
@@ -93,8 +93,6 @@
                 createToast({ title: 'error', description: 'Une erreur est survenue'} , {toastBackgroundColor : 'rgb(255,0,0)', type : 'danger', timeout : 5000, position : 'top-center', showIcon : true});
 
                 }
-
-                btn_wait.style.display = "none";        
 
                 select.style.display = "inline"
 
@@ -208,7 +206,9 @@
   <h3>Color</h3>
   <div id ="panel">
         
-    <p id ="note">L'objectif de cette partie est de garder une couleur de l'image que vous aurez sélectionné au préalable</p>
+    <p id ="note">L'objectif de cette partie est de garder une couleur de l'image que vous aurez sélectionné au préalable. 
+      Vous pouvez cliquer sur l'image pour choisir une couleur, et utiliser le slider pour définir son spectre.
+    </p>
 
   </div>
 
@@ -237,16 +237,6 @@
 
     <input type="range" min = "0" max = "314" step="1" v-model="p1">
 
-    <div id = "wait">
-
-      <br>
-      <br>
-      <button @click="setBackgroung(true)">
-        afficher l'image
-      </button>
-
-    </div>
-
     <br>
     <br>
 
@@ -263,10 +253,6 @@
 
   canvas{
     border: solid 1px rgb(0, 0, 0);
-    display: none;
-  }
-
-  #wait{
     display: none;
   }
 

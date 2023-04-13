@@ -271,7 +271,6 @@ function tour_complet(): boolean {
 
     reset_all();
 
-    var btn_wait = document.getElementById("wait");
     var canvas = <HTMLCanvasElement> document.getElementById("myCanvas");
     var select = document.getElementById("select");
 
@@ -282,7 +281,7 @@ function tour_complet(): boolean {
     // on charge l'image 
     if (value == false){
 
-      if (canvas != null && btn_wait != null && select != null){
+      if (canvas != null && select != null){
         
         canvas.style.display = 'inline';
 
@@ -294,20 +293,20 @@ function tour_complet(): boolean {
 
         setTimeout(function() {
 
-          if (btn_wait != null){
-
-            createToast({ title: 'info', description: "Appuyer sur le bouton afficher pour visualiser l'image"} , {toastBackgroundColor : 'rgb(0,128,0)', type : 'info', timeout : 5000, position : 'top-center', showIcon : true});
-
-            btn_wait.style.display = "inline";
-
-          }
-
           w.value = base_image.width;
           h.value = base_image.height;
 
           console.log(w.value)
 
         }, 2000);
+
+        setTimeout(function() {
+
+          console.log("affiche")
+
+          setBackgroung(true);
+
+        }, 2500);
 
       }
       else{
@@ -318,7 +317,7 @@ function tour_complet(): boolean {
 
     }else{ // on affiche l'image
 
-      if (canvas != null && btn_wait != null && select != null){
+      if (canvas != null && select != null){
         
         if (ctx != null){
           ctx.drawImage(base_image, 0, 0);
@@ -328,8 +327,6 @@ function tour_complet(): boolean {
           createToast({ title: 'error', description: 'Une erreur est survenue'} , {toastBackgroundColor : 'rgb(255,0,0)', type : 'danger', timeout : 5000, position : 'top-center', showIcon : true});
 
         }
-
-        btn_wait.style.display = "none";        
 
         select.style.display = "inline"
 
@@ -395,16 +392,6 @@ function tour_complet(): boolean {
         reset
     </button>
 
-    <div id = "wait">
-
-      <br>
-      <br>
-      <button @click="setBackgroung(true)">
-        afficher l'image
-      </button>
-
-    </div>
-
 <!--     <div id = "cut">
 
       <br>
@@ -426,9 +413,6 @@ function tour_complet(): boolean {
     display: none;
   }
 
-  #wait{
-    display: none;
-  }
 
   #cut{
     display: none;

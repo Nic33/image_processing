@@ -40,50 +40,17 @@
     
   function superposeImages() {
 
-    const back = <HTMLImageElement> document.getElementById('back');
-    const front = <HTMLImageElement> document.getElementById('front');
-
     const start = document.getElementById('btn_start');
 
-    if (back != null && front != null && start != null){
+    if (start != null){
 
-      console.log('The back image size is '+ back.naturalWidth +' x '+ back.naturalHeight);
-      console.log('The front image size is '+ front.naturalWidth +' x '+ front.naturalHeight);
+      start.style.display = 'inline';
+      createToast({ title: 'info' , description: 'Superposition OK'} , {toastBackgroundColor : 'rgb(0, 128, 0)', type : 'info', timeout : 2000, position : 'top-center', showIcon : true});
 
-      if (back.naturalWidth > front.naturalWidth && back.naturalHeight > front.naturalHeight){
-        console.log("Les images ont les bonnes dimension");
-
-        start.style.display = 'inline';
-
-      }else{
-        createToast({ title: 'error', description: "L'image du backend soit avoir une taille supérieur à celle du frontend"} , {toastBackgroundColor : 'rgb(255,0,0)', type : 'danger', timeout : 5000, position : 'top-center', showIcon : true});
-      
-        const right = document.getElementById('right');
-        const cons = document.getElementById('console');
-        const size = document.getElementById('sliderS');
-
-        if(right != null && cons != null && size != null){
-          right.style.display = 'none';
-          cons.style.display = 'none';
-          size.style.display = 'none';
-
-          cpt1 = true;
-          cpt2 = true;
-
-          img1.value = -1;
-          img2.value = -1;
-
-        }else{
-
-          console.log('error : function set_image()');
-          createToast({ title: 'error', description: 'Une erreur est survenue'} , {toastBackgroundColor : 'rgb(255,0,0)', type : 'danger', timeout : 5000, position : 'top-center', showIcon : true});
-
-        }
-      }
     }else{
 
-    console.log('error : function superposeImages()');
-    createToast({ title: 'error', description: 'Une erreur est survenue'} , {toastBackgroundColor : 'rgb(255,0,0)', type : 'danger', timeout : 5000, position : 'top-center', showIcon : true});
+      console.log('error : function superposeImages()');
+      createToast({ title: 'error', description: 'Une erreur est survenue'} , {toastBackgroundColor : 'rgb(255,0,0)', type : 'danger', timeout : 5000, position : 'top-center', showIcon : true});
 
     }
 
@@ -232,7 +199,7 @@
     }
   }
 
-  function set_image(cpt : boolean){
+  function set_image(cpt : boolean){ // on remet tout a 0
 
     const right = document.getElementById('right');
     const cons = document.getElementById('console');
@@ -243,6 +210,7 @@
     const sizeS = <HTMLInputElement> document.getElementById('sliderS');
 
     if(right != null && cons != null && start != null && save != null && sizeS != null){
+
       right.style.display = 'none';
       cons.style.display = 'none';
 
@@ -268,6 +236,7 @@
       cpt1 = false;
 
     }
+
     //On change le frontend
     else if (cpt == false){
 
@@ -281,14 +250,15 @@
     // Les deux images sont présentent
     if (cpt1 == false && cpt2 == false){
 
-      createToast({ title: 'info' , description: 'Please wait'} , {toastBackgroundColor : 'rgb(0, 128, 0)', type : 'info', timeout : 2000, position : 'top-center', showIcon : true});
+      createToast({ title: 'info' , description: 'Please wait...'} , {toastBackgroundColor : 'rgb(0, 128, 0)', type : 'info', timeout : 2000, position : 'top-center', showIcon : true});
 
-      setTimeout(function() {
+      superposeImages();
 
-        superposeImages();
-
-      }, 2000);
     }
+
+    lineX.value = 0;
+    lineY.value = 0;
+    lineS.value = 100;
 
   }
 

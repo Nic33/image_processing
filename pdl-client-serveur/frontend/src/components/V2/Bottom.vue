@@ -311,7 +311,6 @@
 
         reset_all();
 
-        var btn_wait = document.getElementById("wait");
         var canvas = <HTMLCanvasElement> document.getElementById("myCanvas");
         var select = document.getElementById("select");
 
@@ -322,34 +321,33 @@
         // on charge l'image 
         if (value == false){
 
-        if (canvas != null && btn_wait != null && select != null){
-            
-            canvas.style.display = 'inline';
+            if (canvas != null && select != null){
+                
+                canvas.style.display = 'inline';
 
-            createToast({ title: 'info', description: 'Please wait'} , {toastBackgroundColor : 'rgb(0,128,0)', type : 'info', timeout : 2000, position : 'top-center', showIcon : true});
+                createToast({ title: 'info', description: 'Please wait'} , {toastBackgroundColor : 'rgb(0,128,0)', type : 'info', timeout : 2000, position : 'top-center', showIcon : true});
 
-            base_image.src = 'images/'+ imageId.value.toString();
+                base_image.src = 'images/'+ imageId.value.toString();
 
-            select.style.display = "none"
+                select.style.display = "none"
 
-            setTimeout(function() {
+                setTimeout(function() {
 
-            if (btn_wait != null){
+                    w.value = base_image.width;
+                    h.value = base_image.height;
 
-                createToast({ title: 'info', description: "Appuyer sur le bouton afficher pour visualiser l'image"} , {toastBackgroundColor : 'rgb(0,128,0)', type : 'info', timeout : 5000, position : 'top-center', showIcon : true});
+                    
+                }, 2000);
 
-                btn_wait.style.display = "inline";
+                setTimeout(function() {
+
+                    console.log("affiche")
+
+                    setBackgroung(true);
+
+                }, 2500);
 
             }
-
-            w.value = base_image.width;
-            h.value = base_image.height;
-
-            console.log(w.value)
-
-            }, 2000);
-
-        }
         else{
             console.log("error : function setBackgroung()")
             createToast({ title: 'error', description: 'Une erreur est survenue'} , {toastBackgroundColor : 'rgb(255,0,0)', type : 'danger', timeout : 5000, position : 'top-center', showIcon : true});
@@ -358,28 +356,26 @@
 
         }else{ // on affiche l'image
 
-        if (canvas != null && btn_wait != null && select != null){
-            
-            if (ctx != null){
-            ctx.drawImage(base_image, 0, 0);
+            if (canvas != null && select != null){
+                
+                if (ctx != null){
+                ctx.drawImage(base_image, 0, 0);
+
+                }else{
+                console.log("error : function setBackgroung()")
+                createToast({ title: 'error', description: 'Une erreur est survenue'} , {toastBackgroundColor : 'rgb(255,0,0)', type : 'danger', timeout : 5000, position : 'top-center', showIcon : true});
+
+                }
+
+                select.style.display = "inline"
 
             }else{
-            console.log("error : function setBackgroung()")
-            createToast({ title: 'error', description: 'Une erreur est survenue'} , {toastBackgroundColor : 'rgb(255,0,0)', type : 'danger', timeout : 5000, position : 'top-center', showIcon : true});
+                console.log("error : function setBackgroung()")
+                createToast({ title: 'error', description: 'Une erreur est survenue'} , {toastBackgroundColor : 'rgb(255,0,0)', type : 'danger', timeout : 5000, position : 'top-center', showIcon : true});
 
             }
 
-            btn_wait.style.display = "none";        
-
-            select.style.display = "inline"
-
-        }else{
-            console.log("error : function setBackgroung()")
-            createToast({ title: 'error', description: 'Une erreur est survenue'} , {toastBackgroundColor : 'rgb(255,0,0)', type : 'danger', timeout : 5000, position : 'top-center', showIcon : true});
-
-        }
-
-        img_is_put = true;
+            img_is_put = true;
 
         }
 
@@ -456,16 +452,6 @@
         reset
     </button>
 
-    <div id = "wait">
-
-      <br>
-      <br>
-      <button @click="setBackgroung(true)">
-        afficher l'image
-      </button>
-
-    </div>
-
   </div>
 
 </div> 
@@ -476,10 +462,6 @@
   canvas{
     display: none;
     border: solid 1px rgb(0, 0, 0);
-  }
-
-  #wait{
-    display: none;
   }
 
   img{

@@ -73,7 +73,7 @@ The website is compatible with mobile devices.
 
 We changed the navigation bar and we add a footer.
 
-We add the grey function on the "modify" section.
+We add the grey and rotate functions on the "modify" section.
 
 We created 5 new sections: 
 
