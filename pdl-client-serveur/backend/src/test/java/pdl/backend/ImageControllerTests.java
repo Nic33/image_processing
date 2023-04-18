@@ -98,9 +98,9 @@ public class ImageControllerTests {
 		final ClassPathResource imgFile = new ClassPathResource("images/test/hollywood.jpeg");
 		final ClassPathResource imgFile2 = new ClassPathResource("images/test/subTest/android.jpeg");
 		final ClassPathResource pdfFile = new ClassPathResource("images/test/test.pdf");
-		MockMultipartFile multipartFile = new MockMultipartFile("file", "hollywood.jpg", "image/jpeg",
+		MockMultipartFile multipartFile = new MockMultipartFile("file", "hollywood.jpeg", "image/jpeg",
 				imgFile.getInputStream());
-		MockMultipartFile multipartFile2 = new MockMultipartFile("file", "android.jpg", "image/jpeg",
+		MockMultipartFile multipartFile2 = new MockMultipartFile("file", "android.jpeg", "image/jpeg",
 				imgFile2.getInputStream());
 		MockMultipartFile multipartFilePdf = new MockMultipartFile("file", "test.pdf", "file/pdf",
 				pdfFile.getInputStream());
