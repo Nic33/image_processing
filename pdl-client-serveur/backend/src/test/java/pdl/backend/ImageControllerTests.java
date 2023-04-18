@@ -76,8 +76,8 @@ public class ImageControllerTests {
 	@Test
 	@Order(7)
 	public void createImageShouldReturnSuccess() throws Exception {
-		final ClassPathResource imgFile = new ClassPathResource("images/test.jpg");
-		MockMultipartFile multipartFile = new MockMultipartFile("file", "test.jpg", "image/jpeg",
+		final ClassPathResource imgFile = new ClassPathResource("images/fire_truck.jpeg");
+		MockMultipartFile multipartFile = new MockMultipartFile("file", "fire_truck.jpeg", "image/jpeg",
 				imgFile.getInputStream());
 		this.mockMvc.perform(MockMvcRequestBuilders.multipart("/images").file(multipartFile)).andDo(print())
 				.andExpect(status().isCreated());
@@ -86,7 +86,7 @@ public class ImageControllerTests {
 	@Test
 	@Order(8)
 	public void createImageShouldReturnUnsupportedMediaType() throws Exception {
-		MockMultipartFile multipartFile = new MockMultipartFile("file", "test.jpg", "text/plain", "Test".getBytes());
+		MockMultipartFile multipartFile = new MockMultipartFile("file", "fire_truck.jpeg", "text/plain", "Test".getBytes());
 		this.mockMvc.perform(MockMvcRequestBuilders.multipart("/images").file(multipartFile)).andDo(print())
 				.andExpect(status().isUnsupportedMediaType());
 	}
@@ -95,12 +95,12 @@ public class ImageControllerTests {
 	@Order(9)
 	public void testRetrieveImageInSubFolder() throws Exception { // Wrong test (test add image and not if the backend
 																	// load at it start images files)
-		final ClassPathResource imgFile = new ClassPathResource("images/test/test1.jpg");
-		final ClassPathResource imgFile2 = new ClassPathResource("images/test/subTest/test2.jpg");
+		final ClassPathResource imgFile = new ClassPathResource("images/test/hollywood.jpeg");
+		final ClassPathResource imgFile2 = new ClassPathResource("images/test/subTest/android.jpeg");
 		final ClassPathResource pdfFile = new ClassPathResource("images/test/test.pdf");
-		MockMultipartFile multipartFile = new MockMultipartFile("file", "test1.jpg", "image/jpeg",
+		MockMultipartFile multipartFile = new MockMultipartFile("file", "hollywood.jpg", "image/jpeg",
 				imgFile.getInputStream());
-		MockMultipartFile multipartFile2 = new MockMultipartFile("file", "test2.jpg", "image/jpeg",
+		MockMultipartFile multipartFile2 = new MockMultipartFile("file", "android.jpg", "image/jpeg",
 				imgFile2.getInputStream());
 		MockMultipartFile multipartFilePdf = new MockMultipartFile("file", "test.pdf", "file/pdf",
 				pdfFile.getInputStream());

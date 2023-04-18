@@ -62,9 +62,7 @@
         cpt = true;
 
         createToast({ title: 'error', description: "Attention, vous utilisez le site sur votre smartphone, vous n'aurez pas accès à toutes les fonctionnalités que peut proposer le site web."} , {toastBackgroundColor : 'rgb(255, 0, 0)', type : 'danger', timeout : 10000, position : 'top-center', showIcon : true});
-        setTimeout(function() {
-          cpt = false;
-        }, 10000);
+        
 
       } else {
 
@@ -74,10 +72,7 @@
 
           cpt = true;
 
-          createToast({ title: 'error', description: "Attention, vous utilisez le site sur une petite fenêtre. Pour des raisons d'ergonomies, nous désactivons les fonctionnalités 'Editor', 'Cut' et 'Bottom'."} , {toastBackgroundColor : 'rgb(255, 0, 0)', type : 'danger', timeout : 10000, position : 'top-center', showIcon : true});
-          setTimeout(function() {
-            cpt = false;
-          }, 10000);
+          createToast({ title: 'error', description: "Attention, vous utilisez le site sur une petite fenêtre. Pour des raisons d'ergonomies, nous désactivons les fonctionnalités 'Editor', 'Cut', 'Bottom' et 'Color'."} , {toastBackgroundColor : 'rgb(255, 0, 0)', type : 'danger', timeout : 10000, position : 'top-center', showIcon : true});
 
         }
 

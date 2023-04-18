@@ -316,8 +316,8 @@ async function Delete() {
 
     </div>
 
-    <figure :id="'gallery-' + id"></figure>
-
+    <br>
+    
     <div id="panel2">
 
       <a @click="Delete()">
@@ -333,6 +333,7 @@ async function Delete() {
       </a>
 
     </div>
+    <figure :id="'gallery-' + id"></figure>
   </div>
 </template>
 
